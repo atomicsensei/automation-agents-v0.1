@@ -567,7 +567,23 @@ Record `lintCommand` in `docs/qa-config.json`. This command will be used:
 
 ---
 
-### Setup Step 8 — Save Configuration
+### Setup Step 8 — Orchestration Mode
+
+Ask:
+
+> "How would you like the agent pipeline to be orchestrated?
+> 1. **Fully automatic** — agents chain together without pausing for your approval. Each stage hands off to the next automatically. Fastest option, best for trusted pipelines.
+> 2. **Human gates** — I stop at each major checkpoint and wait for your explicit approval before dispatching the next agent. More control, slower pace."
+
+Record the answer as `orchestrationMode` in `docs/qa-config.json`:
+- Option 1 → `"orchestrationMode": "auto"`
+- Option 2 → `"orchestrationMode": "gated"`
+
+Default if the user skips or is unsure: `"gated"` (safer).
+
+---
+
+### Setup Step 9 — Save Configuration
 
 After all steps are answered, write `docs/qa-config.json`:
 
@@ -602,7 +618,8 @@ After all steps are answered, write `docs/qa-config.json`:
     "tools": ["<e.g. eslint>", "<e.g. prettier>"],
     "lintCommand": "<e.g. npm run lint>",
     "formatCommand": "<e.g. npm run format:check>"
-  }
+  },
+  "orchestrationMode": "<auto | gated>"
 }
 ```
 
@@ -651,7 +668,11 @@ Then scaffold the folder structure, create the CI/CD config file, and confirm to
 
 ## ORCHESTRATOR MODE
 
-> Activate when `docs/qa-config.json` exists. Read it at the start of every session to understand the project's framework, language, folder structure, issue tracker, and environments.
+> Activate when `docs/qa-config.json` exists. Read it at the start of every session to understand the project's framework, language, folder structure, issue tracker, environments, and **orchestration mode**.
+
+**Orchestration mode** is read from `docs/qa-config.json` → `orchestrationMode`:
+- `"auto"` — pipeline stages chain automatically; skip all human approval gates and proceed without stopping.
+- `"gated"` — stop at each human gate, present a summary, and wait for explicit approval before dispatching the next agent. This is the default if the field is missing.
 
 ---
 
@@ -804,7 +825,11 @@ Mark all ACs as `[x]` in the task spec. Report:
 
 ### HUMAN APPROVAL GATE — STOP AFTER STEP 3
 
-Present the created spec path and a summary to the user:
+> **Check `orchestrationMode` in `docs/qa-config.json` before applying this gate.**
+> - If `"auto"` — skip this gate entirely and proceed directly to Step 4.
+> - If `"gated"` (or field is absent) — apply the gate below.
+
+**[GATED MODE ONLY]** Present the created spec path and a summary to the user:
 
 ```
 Task spec created: docs/tasks/task-XXX-spec.md
@@ -822,7 +847,9 @@ Reply with:
   Or provide corrections and I will update the spec before proceeding.
 ```
 
-**Do NOT dispatch any agent until the user replies with 'Approved'.**
+**[GATED MODE ONLY] Do NOT dispatch any agent until the user replies with 'Approved'.**
+
+**[AUTO MODE]** Log the spec summary to the conversation (one paragraph, no table), then immediately proceed to Step 4 without waiting.
 
 ---
 
