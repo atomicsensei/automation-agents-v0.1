@@ -286,7 +286,17 @@ Record the env variable names needed per tracker — these go into `.env.templat
 | Azure DevOps | `ADO_ORG`, `ADO_PROJECT`, `ADO_TOKEN` |
 | Linear | `LINEAR_API_KEY`, `LINEAR_TEAM_ID` |
 | Trello / None | No variables needed |
+**If the user chose JIRA**, ask a follow-up question:
 
+> "How should the agents interact with JIRA tickets?
+> 1. **Read-only** — agents only fetch ticket data to inform test generation. No changes are ever made to JIRA. _(Safest option, recommended for most teams.)_
+> 2. **Full integration via JIRA MCP** — agents can also write back to JIRA: post comments, transition status, update fields, and log test results against tickets. _(Requires JIRA MCP to be configured and available.)_"
+
+Record the answer as `jiraIntegration` in `docs/qa-config.json`:
+- Option 1 → `"jiraIntegration": "read-only"`
+- Option 2 → `"jiraIntegration": "read-write"`
+
+Default if the user skips or is unsure: `"read-only"` (safer).
 > IMPORTANT: Never store actual credentials in any file tracked by version control. All values go into `.env` (git-ignored). `.env.template` contains only the variable names.
 
 ---
@@ -603,6 +613,7 @@ After all steps are answered, write `docs/qa-config.json`:
   },
   "issueTracker": {
     "type": "<e.g. jira>",
+    "jiraIntegration": "<read-only | read-write>",
     "envVars": ["JIRA_BASE_URL", "JIRA_EMAIL", "JIRA_API_TOKEN", "JIRA_PROJECT_KEY"]
   },
   "access": {
@@ -685,7 +696,9 @@ Accept any of:
 - A URL + description of what needs to be tested
 
 **If a ticket ID is provided**, fetch it using the configured tracker tool from `docs/qa-config.json`:
-- JIRA: call `get_jira_issue` with `{ "issueKey": "PROJ-123" }`
+- JIRA: call `get_jira_issue` with `{ "issueKey": "PROJ-123" }` to fetch the ticket.
+  - If `issueTracker.jiraIntegration` is `"read-write"`, you may also use JIRA MCP write operations (post comments, transition status, update fields) at appropriate points in the pipeline — for example, posting a comment when tests pass or transitioning the ticket to "In Testing".
+  - If `issueTracker.jiraIntegration` is `"read-only"` (or the field is absent), **never** perform any write operation on JIRA under any circumstances.
 - GitHub Issues: call the GitHub Issues MCP tool
 - Others: prompt the user to paste the ticket content
 
@@ -965,7 +978,9 @@ Delivered files:
 All acceptance criteria covered. lint passes. Code review approved. All tests pass.
 ```
 
-> JIRA IS READ-ONLY — never post comments, update fields, change status, or perform any write action on any JIRA ticket under any circumstances. The only permitted JIRA operation is `get_jira_issue` to fetch ticket data.
+> **JIRA write access is controlled by `docs/qa-config.json` → `issueTracker.jiraIntegration`.**
+> - `"read-only"` (default) — the only permitted operation is `get_jira_issue`. Never post comments, update fields, or change status.
+> - `"read-write"` — JIRA MCP write operations are permitted. Use them intentionally: post a comment when all tests pass, transition the ticket when the task spec is complete, or log a failure comment when the fix loop is exhausted. Never make speculative or redundant writes.
 
 ---
 
