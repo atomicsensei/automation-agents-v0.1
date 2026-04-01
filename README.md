@@ -1,12 +1,18 @@
 # AutomationAgents
 
-> AI-powered agent pipeline that scaffolds, writes, reviews, and runs test automation — driven entirely through GitHub Copilot Chat.
+> AI-powered agent pipeline that scaffolds, writes, reviews, and runs test automation — driven through GitHub Copilot Chat or the `gh aw` CLI.
+
+**Don't use VS Code?** See the [CLI guide](docs/cli-guide.md) to run the full pipeline from the terminal using `gh aw`.
 
 ---
 
 ## What Is This?
 
 AutomationAgents is a collection of specialised GitHub Copilot agents that collaborate as a pipeline to build and maintain a test automation framework from scratch. You describe what needs to be tested; the agents handle the rest — from project scaffolding and page object creation to writing specs, reviewing code, and executing tests.
+
+The pipeline supports two interfaces:
+- **GitHub Copilot Chat (VS Code)** — interactive, conversational, one question at a time
+- **`gh aw` CLI** — terminal-driven, pipeline dispatched as GitHub Actions, no editor required
 
 ---
 
@@ -125,6 +131,7 @@ The Planner will:
 | `.github/agents/` | Agent definition files — each agent's instructions live here |
 | `docs/qa-config.json` | Project configuration written by the setup wizard; read by every agent |
 | `docs/tasks/` | Auto-generated task spec files (`task-001-spec.md`, etc.) |
+| `docs/cli-guide.md` | Full guide for running the pipeline via `gh aw` CLI (no VS Code required) |
 | `.env.template` | Secret variable name placeholders — copy to `.env` and fill in real values |
 | `.env` | **Git-ignored.** Your actual credentials and environment URLs go here |
 
