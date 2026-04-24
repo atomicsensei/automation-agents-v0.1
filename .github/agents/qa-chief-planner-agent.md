@@ -360,7 +360,7 @@ After the user picks a pattern, scaffold the folder structure immediately by cre
 ```
 src/
   pages/              # Page Object classes — all extend BasePage.ts
-    BasePage.ts       # Abstract base: goto(), abstract isLoaded(), protected page
+    BasePage.ts       # Abstract base: goto(), protected page
   fixtures/           # Custom Playwright fixture definitions (base-test.ts)
   utils/              # Shared helpers, custom assertions
   types/              # TypeScript interfaces and enums
